@@ -61,7 +61,7 @@ var defaultViewRect;
     var view = [[CPView alloc] initWithFrame:defaultViewRect];
 
     var label = [CPTextField labelWithTitle:"Buttons"];
-    [label setFrameOrigin:CGPointMake(55, 15)];
+    [label setFrameOrigin:CGPointMake(55, 20)];
     [view addSubview:label]
 
     var button = [[CPButton alloc] initWithFrame:CGRectMake(15, 40, 120, 24)];
@@ -100,7 +100,7 @@ var defaultViewRect;
         Text
     */
     var label = [CPTextField labelWithTitle:"Textfields"];
-    [label setFrameOrigin:CGPointMake(220, 15)];
+    [label setFrameOrigin:CGPointMake(220, 20)];
     [view addSubview:label];
 
     var text = [[CPTextField alloc] initWithFrame:CGRectMake(190, 40, 120, 28)];
@@ -126,12 +126,16 @@ var defaultViewRect;
     [text setStringValue:"Label"];
     [view addSubview:text];
 
+    var text = [[CPSearchField alloc] initWithFrame:CGRectMake(190, 172, 120, 30)];
+    [text setStringValue:"Search Field"];
+    [view addSubview:text];
+
 
     /*
         Other
     */
     var label = [CPTextField labelWithTitle:"Other Controls"];
-    [label setFrameOrigin:CGPointMake(360, 15)];
+    [label setFrameOrigin:CGPointMake(380, 20)];
     [view addSubview:label];
 
     var control = [[CPSegmentedControl alloc] initWithFrame:CGRectMake(340, 40, 0, 24)];
@@ -171,10 +175,27 @@ var defaultViewRect;
     [control2 setTarget:control1];
     [control2 setAction:@selector(takeFloatValueFrom:)];
 
+    var progress = [[CPProgressIndicator alloc] initWithFrame:CGRectMake(340, 265, 120, 15)];
+    [view addSubview:progress];
+
+    var callback = function(){
+        var value = [progress doubleValue];
+
+        if (this.increment && value >= 100)
+            this.increment = NO;
+        else if (!this.increment && value <= 0)
+            this.increment = YES;
+
+        [progress incrementBy:(this.increment) ? 1 : -1];
+    }
+    callback.increment = YES;
+
+    var timer = [CPTimer scheduledTimerWithTimeInterval:.05 callback:callback repeats:YES];
 
 
+    var control = [[CPProgressIndicator alloc] initWithFrame:CGRectMake(340, 295, 64, 64)];
+    [control setStyle:CPProgressIndicatorSpinningStyle];
     [view addSubview:control];
-
 
     return view;
 
@@ -313,3 +334,7 @@ var defaultViewRect;
     return [aCol identifier] + " - " + data[aRow];
 }
 @end
+
+/*@implementation ProgressbarAnimation : CPObject
+
+@end*/
