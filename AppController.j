@@ -379,7 +379,40 @@ Object.prototype.isa = CPObject;
 {
     var view = [[CPView alloc] initWithFrame:defaultViewRect];
 
-    var button = [[CPButton alloc] initWithFrame:CGRectMake(15, 15, 100, 24)];
+    var button = [[CPButton alloc] initWithFrame:CGRectMake(15, 20, 100, 24)];
+    [button setTitle:"CPWindow"];
+    [view addSubview:button];
+
+    var button = [[CPButton alloc] initWithFrame:CGRectMake(130, 20, 100, 24)];
+    [button setTitle:"CPPlatformWindow"];
+    [view addSubview:button];
+
+    var button = [[CPButton alloc] initWithFrame:CGRectMake(245, 20, 100, 24)];
+    [button setTitle:"Info CPAlert"];
+    [view addSubview:button];
+
+    var button = [[CPButton alloc] initWithFrame:CGRectMake(370, 20, 100, 24)];
+    [button setTitle:"Warn CPAlert"];
+    [view addSubview:button];
+
+    var button = [[CPButton alloc] initWithFrame:CGRectMake(495, 20, 100, 24)];
+    [button setTitle:"Error CPAlert"];
+    [view addSubview:button];
+
+    var button = [[CPButton alloc] initWithFrame:CGRectMake(15, 59, 100, 24)];
+    [button setTitle:"Attached Sheet"];
+    [view addSubview:button];
+
+    var button = [[CPButton alloc] initWithFrame:CGRectMake(130, 59, 100, 24)];
+    [button setTitle:"Color Panel"];
+    [view addSubview:button];
+
+    var picker = [CPColorPanel sharedColorPanel];
+    [button setTarget:picker];
+    [button setAction:@selector(orderFront:)];
+
+    var button = [[CPButton alloc] initWithFrame:CGRectMake(245, 59, 100, 24)];
+    [button setTitle:"Window & Toolbar"];
     [view addSubview:button];
 
     return view;
