@@ -169,6 +169,10 @@ var defaultViewRect;
     var control2 = [[CPSlider alloc] initWithFrame:CGRectMake(340, 135, 24, 120)];
     [view addSubview:control2];
 
+    var control3 = [[CPSlider alloc] initWithFrame:CGRectMake(385, 150, 32,32)];
+    [control3 setSliderType:CPCircularSlider];
+    [view addSubview:control3];
+
     // bind the two sliders
     [control1 setTarget:control2];
     [control1 setAction:@selector(takeFloatValueFrom:)];
@@ -196,6 +200,34 @@ var defaultViewRect;
     var control = [[CPProgressIndicator alloc] initWithFrame:CGRectMake(340, 295, 64, 64)];
     [control setStyle:CPProgressIndicatorSpinningStyle];
     [view addSubview:control];
+
+
+    /*
+        Token
+    */
+    var label = [CPTextField labelWithTitle:"More Awesome Stuff"];
+    [label setFrameOrigin:CGPointMake(535, 20)];
+    [view addSubview:label];
+
+    var control = [[CPTokenField alloc] initWithFrame:CGRectMake(535, 40, 200, 100)];
+    [control setObjectValue:["token", "field"]];
+    [control setEditable:YES];
+    [control setDelegate:[TokenFieldDelegate new]];
+    [control setCompletionDelay:0];
+    [view addSubview:control];
+
+
+    var text = [[CPTextField alloc] initWithFrame:CGRectMake(535, 150, 200, 31)];
+    [text setBezeled:YES];
+    [text setVerticalAlignment:CPCenterVerticalTextAlignment];
+    [text setStringValue:"0"];
+    [view addSubview:text];
+
+    var control = [[CPStepper alloc] initWithFrame:CGRectMake(712, 153, 19, 26)];
+    [control setTarget:text];
+    [control setAction:@selector(takeIntValueFrom:)];
+    [view addSubview:control];
+    
 
     return view;
 
@@ -335,6 +367,37 @@ var defaultViewRect;
 }
 @end
 
-/*@implementation ProgressbarAnimation : CPObject
+@implementation TokenFieldDelegate : CPObject
+{
+    CPArray states;
+}
 
-@end*/
+- (id)init
+{
+    self = [super init];
+
+    states = ["Alabama", "Alaska", "American Samoa", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "District of Columbia", "Florida", "Georgia", "Guam", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Northern Marianas Islands", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Puerto Rico", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Virgin Islands", "Washington", "West Virginia", "Wisconsin", "Wyoming"];
+
+    return self;
+}
+
+- (CPArray)tokenField:(CPTokenField)aTokenField completionsForSubstring:(CPString)aString indexOfToken:(int)anIndex indexOfSelectedItem:(int)selectedIndex
+{
+    if (aString)
+    {
+        var matches = [],
+            search = [aString lowercaseString];
+
+        for (var i = 0, c = states.length; i < c; i++)
+        {
+            var state = [states[i] lowercaseString];
+            if ([state hasPrefix:search])
+                [matches addObject:states[i]];
+        }
+
+        return matches
+    }
+    else
+        return [];
+}
+@end
