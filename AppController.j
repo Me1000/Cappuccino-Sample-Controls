@@ -60,8 +60,121 @@ var defaultViewRect;
 {
     var view = [[CPView alloc] initWithFrame:defaultViewRect];
 
-    var button = [[CPButton alloc] initWithFrame:CGRectMake(15, 15, 100, 24)];
+    var label = [CPTextField labelWithTitle:"Buttons"];
+    [label setFrameOrigin:CGPointMake(55, 15)];
+    [view addSubview:label]
+
+    var button = [[CPButton alloc] initWithFrame:CGRectMake(15, 40, 120, 24)];
+    [button setTitle:"Standard Button"];
     [view addSubview:button];
+
+    var button = [[CPButton alloc] initWithFrame:CGRectMake(15, 75, 120, 24)];
+    [button setTitle:"Round Button"];
+    [button setThemeState:CPButtonStateBezelStyleRounded];
+    [view addSubview:button];
+
+    var button = [[CPButton alloc] initWithFrame:CGRectMake(15, 110, 120, 24)];
+    [button setTitle:"Default Button"];
+    [button setKeyEquivalent:CPCarriageReturnCharacter];
+    [view addSubview:button];
+
+    var button = [CPCheckBox checkBoxWithTitle:"Checkbox"];
+    [button setFrameOrigin:CGPointMake(15, 145)];
+    [button setAllowsMixedState:YES];
+    [view addSubview:button];
+
+    var button = [CPRadio radioWithTitle:"Radio"];
+    [button setFrameOrigin:CGPointMake(15, 170)];
+    [view addSubview:button];
+
+    var button = [[CPPopUpButton alloc] initWithFrame:CGRectMake(15, 195, 120, 24) pullsDown:NO];
+    [button addItemsWithTitles:["Popup Button", "Item 2", "Item 3"]];
+    [view addSubview:button];
+
+    var button = [[CPPopUpButton alloc] initWithFrame:CGRectMake(15, 235, 120, 24) pullsDown:YES];
+    [button addItemsWithTitles:["Pulldown Button", "Item 2", "Item 3"]];
+    [view addSubview:button];
+
+
+    /*
+        Text
+    */
+    var label = [CPTextField labelWithTitle:"Textfields"];
+    [label setFrameOrigin:CGPointMake(220, 15)];
+    [view addSubview:label];
+
+    var text = [[CPTextField alloc] initWithFrame:CGRectMake(190, 40, 120, 28)];
+    [text setStringValue:"Standard Text"];
+    [text setEditable:YES];
+    [text setBezeled:YES];
+    [view addSubview:text];
+
+    var text = [[CPTextField alloc] initWithFrame:CGRectMake(190, 75, 120, 28)];
+    [text setPlaceholderString:"Placeholder Text"];
+    [text setEditable:YES];
+    [text setBezeled:YES];
+    [view addSubview:text];
+
+    var text = [[CPTextField alloc] initWithFrame:CGRectMake(190, 105, 120, 30)];
+    [text setPlaceholderString:"Rounded Text"];
+    [text setEditable:YES];
+    [text setBezeled:YES];
+    [text setBezelStyle:CPTextFieldRoundedBezel];
+    [view addSubview:text];
+
+    var text = [[CPTextField alloc] initWithFrame:CGRectMake(190, 142, 120, 30)];
+    [text setStringValue:"Label"];
+    [view addSubview:text];
+
+
+    /*
+        Other
+    */
+    var label = [CPTextField labelWithTitle:"Other Controls"];
+    [label setFrameOrigin:CGPointMake(360, 15)];
+    [view addSubview:label];
+
+    var control = [[CPSegmentedControl alloc] initWithFrame:CGRectMake(340, 40, 0, 24)];
+    [control setSegmentCount:3];
+    [control setWidth:50 forSegment:0];
+    [control setWidth:50 forSegment:1];
+    [control setWidth:50 forSegment:2];
+    [control setLabel:"Seg 1" forSegment:0];
+    [control setLabel:"Seg 2" forSegment:1];
+    [control setLabel:"Seg 3" forSegment:2];
+    [view addSubview:control];
+
+    var control = [[CPSegmentedControl alloc] initWithFrame:CGRectMake(340, 75, 0, 24)];
+    [control setSegmentCount:3];
+    [control setWidth:50 forSegment:0];
+    [control setWidth:50 forSegment:1];
+    [control setWidth:50 forSegment:2];
+    [control setLabel:"Seg 1" forSegment:0];
+    [control setLabel:"Seg 2" forSegment:1];
+    [control setLabel:"Seg 3" forSegment:2];
+    [control setTrackingMode:CPSegmentSwitchTrackingSelectAny];
+    [control setSelected:YES forSegment:0];
+    [control setSelected:YES forSegment:2];
+    [view addSubview:control];
+
+    var control1 = [[CPSlider alloc] initWithFrame:CGRectMake(340, 100, 150, 24)];
+    [control setFloatValue:25.0];
+    
+    [view addSubview:control1];
+
+    var control2 = [[CPSlider alloc] initWithFrame:CGRectMake(340, 135, 24, 120)];
+    [view addSubview:control2];
+
+    // bind the two sliders
+    [control1 setTarget:control2];
+    [control1 setAction:@selector(takeFloatValueFrom:)];
+    [control2 setTarget:control1];
+    [control2 setAction:@selector(takeFloatValueFrom:)];
+
+
+
+    [view addSubview:control];
+
 
     return view;
 
