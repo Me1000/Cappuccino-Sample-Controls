@@ -21,6 +21,7 @@ var defaultViewRect;
         frame = [contentView frame];
 
     var tabview = [[CPTabView alloc] initWithFrame:CGRectMake(15, 15, frame.size.width - 30, frame.size.height - 30)];
+    [tabview setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
 
 
     defaultViewRect = CGRectMake(15, 15, frame.size.width - 60, frame.size.height - 90);
@@ -256,6 +257,8 @@ var defaultViewRect;
     [imageView setImageScaling:CPScaleNone];
     [column setDataView:imageView];
     [table addTableColumn:column];
+    [table setUsesAlternatingRowBackgroundColors:YES];
+    [table registerForDraggedTypes:["testType"]];
 
 
     while (columnCount--)
@@ -268,7 +271,10 @@ var defaultViewRect;
         [table addTableColumn:column];
     }
 
-    [table setDataSource:[[TableViewDataSource alloc] init]];
+    var dataSourceAndDelegate = [[TableViewDataSource alloc] init];
+    [table setDataSource:dataSourceAndDelegate];
+    [table setDelegate:dataSourceAndDelegate];
+    [table setAllowsMultipleSelection:YES];
     [scroll setDocumentView:table];
 
 
@@ -303,6 +309,7 @@ var defaultViewRect;
 
     [table setDataSource:[[TableViewDataSource alloc] init]];
     [table setSelectionHighlightStyle:CPTableViewSelectionHighlightStyleSourceList];
+    [table registerForDraggedTypes:["testType"]];
     [scroll setDocumentView:table];
 
     return view;
@@ -364,6 +371,46 @@ var defaultViewRect;
     if ([aCol identifier] === "Image")
         return [[CPImage alloc] initWithContentsOfFile:"http://cappuccino.org/images/favicon.png" size:CGSizeMake(16,16)];
     return [aCol identifier] + " - " + data[aRow];
+}
+
+- (BOOL)tableView:(CPTableView)aTable isGroupRow:(int)aRow
+{
+    return aRow % 10 === 0;
+}
+
+- (BOOL)tableView:(CPTableView)aTableView writeRowsWithIndexes:(CPIndexSet)rowIndexes toPasteboard:(CPPasteboard)pboard
+{
+    [pboard declareTypes:[CPArray arrayWithObject:"testType"] owner:self];
+
+    return YES;
+}
+
+- (CPDragOperation)tableView:(CPTableView)aTableView
+                   validateDrop:(id)info
+                   proposedRow:(CPInteger)row
+                   proposedDropOperation:(CPTableViewDropOperation)operation
+{
+/*    if (aTableView === tableView)
+        [aTableView setDropRow:row dropOperation:CPTableViewDropOn];
+    else
+        [aTableView setDropRow:row dropOperation:CPTableViewDropAbove];
+*/
+    return CPDragOperationMove;
+}
+
+- (BOOL)tableView:(CPTableView)aTableView acceptDrop:(id)info row:(int)row dropOperation:(CPTableViewDropOperation)operation
+{
+    var alrt = [[CPAlert alloc] init];
+
+    [alrt setTitle:"Cool Features"];
+    [alrt setMessageText:"No reordering implemented"];
+    [alrt setInformativeText:"Since this is just a demo we haven't actually implement the drop behavior here."];
+    [alrt setAlertStyle:CPInformationalAlertStyle];
+    [alrt addButtonWithTitle:"Okay"];
+
+    [alrt runModal];
+
+    return NO;
 }
 @end
 
