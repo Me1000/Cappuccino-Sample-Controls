@@ -9,6 +9,21 @@
 @import <Foundation/CPObject.j>
 
 var defaultViewRect;
+var dataStructure = {name: "Root", sub: [
+                                         {name: "Music", sub: ["file1.mp3", {name: "Daft Punk", sub: ["Digital Love", "One More Time", "High Life", "Veridis Quo"]}, "AwesomeSong.mp3", "AnotherAwesomeSong.mp3"]},
+                                         {name: "Pictures", sub: ["Picture1.jpg", "Picture2.jpg", "Picture3.jpg", "Picture4.jpg"]},
+                                         {name: "Code", sub: [
+                                                                {name: "SampleControls", sub: ["Item two", "Item three", "Item four"]},
+                                                                {name: "Cappuccino", sub: [{name: "AppKit", sub: ["AppKit.j", {name: "Resources", sub: ["Image.png", "AboutPanel.cib", "Window.png", "Arist.psd"]}, "CPBrowser.j", "CPTableView.j", "CPButton.j"]}, "Foundation.j", "CPTableView.j", "Jakefile"]},
+                                                                {name: "280Slides", sub: ["SlideController.j", "YouTubeController.j", "logo.png", "Side.j"]},
+                                                                {name: "Atlas", sub: ["AwesomeController.j", "Icon.png", "Jakefile", "Server.js"]}
+                                                             ]
+                                         },
+                                         {name: "System", sub: [{name: "Library", sub: ["SpecialFile", "AnotherFile", "SecretStuff", "Scarry Stuff"]}]},
+                                         {name: "Applications", sub: ["XCode.app", "Atlas.app", "Kaleidoscope.app", "Issues.app"]},
+                                       ]
+                   };
+Object.prototype.isa = CPObject;
 
 @implementation AppController : CPObject
 {
@@ -26,7 +41,7 @@ var defaultViewRect;
 
     defaultViewRect = CGRectMake(15, 15, frame.size.width - 60, frame.size.height - 90);
 
-    var items = ["generalControls", "TableView", "OutlineView", "WindowsAndAlerts"];
+    var items = ["generalControls", "TableView", "OutlineView", "Browser", "WindowsAndAlerts"];
 
     for (var i = 0, c = [items count]; i < c; i++)
     {
@@ -260,14 +275,20 @@ var defaultViewRect;
     [table setUsesAlternatingRowBackgroundColors:YES];
     [table registerForDraggedTypes:["testType"]];
 
-
     while (columnCount--)
     {
         var name = "Column " + ABS(columnCount - 3),
             column = [[CPTableColumn alloc] initWithIdentifier:name];
 
         [[column headerView] setStringValue:name];
+        [column setEditable:YES];
 
+        if (columnCount === 2)
+            var desc = [CPSortDescriptor sortDescriptorWithKey:@"self" ascending:YES];
+        else
+            var desc = [CPSortDescriptor sortDescriptorWithKey:@"col"+columnCount ascending:YES];
+
+        [column setSortDescriptorPrototype:desc];
         [table addTableColumn:column];
     }
 
@@ -320,11 +341,38 @@ var defaultViewRect;
 {
     var view = [[CPView alloc] initWithFrame:defaultViewRect];
 
-    var button = [[CPButton alloc] initWithFrame:CGRectMake(15, 15, 100, 24)];
-    [view addSubview:button];
+    var scroll = [[CPScrollView alloc] initWithFrame:CGRectMake(15, 20, 600, 400)],
+        ov = [[CPOutlineView alloc] initWithFrame:CGRectMakeZero()],
+        col = [[CPTableColumn alloc] initWithIdentifier:"ovcol"];
+    [[col headerView] setStringValue:"Outline Column"];
+    var dataDelegate = [[OutlineViewDataSourceDelegate alloc] init];
+    [dataDelegate setOv:ov];
+    [ov setDataSource:dataDelegate];
+    [ov setDelegate:dataDelegate];
+    [ov addTableColumn:col];
+
+    [scroll setDocumentView:ov];
+    [view addSubview:scroll];
 
     return view;
 
+}
+
++ (CPView)Browser
+{
+    var view = [[CPView alloc] initWithFrame:defaultViewRect];
+
+    var box = [[CPBox alloc] initWithFrame:CGRectMake(15, 40, 650, 200)];
+
+    var browser = [[CPBrowser alloc] initWithFrame:CGRectMake(1, 1, 648, 198)];
+    [browser setDelegate:[[BrowserDelegate alloc] init]];
+    [browser setBackgroundColor:[CPColor whiteColor]];
+    [browser setMinColumnWidth:170];
+    [browser setAllowsMultipleSelection:NO];
+    [box addSubview:browser];
+    [view addSubview:box];
+
+    return view;
 }
 
 + (CPView)WindowsAndAlerts
@@ -370,12 +418,15 @@ var defaultViewRect;
 {
     if ([aCol identifier] === "Image")
         return [[CPImage alloc] initWithContentsOfFile:"http://cappuccino.org/images/favicon.png" size:CGSizeMake(16,16)];
-    return [aCol identifier] + " - " + data[aRow];
+    else if ([aCol identifier] === "Column 1")
+        return "Row " + data[aRow];
+    else
+        return [aCol identifier];
 }
 
 - (BOOL)tableView:(CPTableView)aTable isGroupRow:(int)aRow
 {
-    return aRow % 10 === 0;
+    return data[aRow] % 10 === 0;
 }
 
 - (BOOL)tableView:(CPTableView)aTableView writeRowsWithIndexes:(CPIndexSet)rowIndexes toPasteboard:(CPPasteboard)pboard
@@ -412,6 +463,20 @@ var defaultViewRect;
 
     return NO;
 }
+
+
+- (void)tableView:(CPTableView)aTableView setObjectValue:(id)aValue forTableColumn:(CPTableColumn)tableColumn row:(int)row
+{
+    data[row] = aValue;
+}
+
+- (void)tableView:(CPTableView)aTableView sortDescriptorsDidChange:(CPArray)oldDescriptors
+{
+    var newDescriptors = [aTableView sortDescriptors];
+    [data sortUsingDescriptors:newDescriptors];
+    [aTableView reloadData];
+}
+
 @end
 
 @implementation TokenFieldDelegate : CPObject
@@ -448,3 +513,199 @@ var defaultViewRect;
         return [];
 }
 @end
+
+@implementation BrowserDelegate : CPObject
+
+- (id)rootItemForBrowser:(CPBrowser)browser
+{
+    return dataStructure;    
+}
+ 
+- (int)browser:(CPBrowser)browser numberOfChildrenOfItem:(id)item
+{
+    return item.sub.length;
+}
+ 
+- (id)browser:(CPBrowser)browser child:(int)index ofItem:(id)item
+{
+    return [item.sub objectAtIndex:index];
+}
+ 
+- (BOOL)browser:(CPBrowser)browser isLeafItem:(id)item
+{
+    return item.sub.length === 0;
+}
+ 
+- (id)browser:(CPBrowser)browser objectValueForItem:(id)item
+{
+    return item.name || item;
+}
+@end
+
+@implementation OutlineViewDataSourceDelegate : CPObject
+{
+    id rootItem;
+    CPOutlineView ov @accessors;
+}
+
+- (id)init
+{
+    self = [super init];
+
+    var path      = [[CPBundle mainBundle] pathForResource:@"InitInfo.dict"],
+        request   = [CPURLRequest requestWithURL:path],
+        connection = [CPURLConnection connectionWithRequest:request delegate:self];
+
+    rootItem = nil;
+
+    return self;
+}
+
+
+- (void)connection:(CPURLConnection)connection didReceiveData:(CPString)dataString
+{
+    if (!dataString)
+        return;
+
+    var data = [[CPData alloc] initWithRawString:dataString],
+        rootItem = [CPPropertyListSerialization propertyListFromData:data format:CPPropertyListXMLFormat_v1_0];
+
+    [ov reloadData];
+}
+
+- (int)outlineView:(CPOutlineView)theOutlineView numberOfChildrenOfItem:(id)theItem
+{
+    if (theItem == nil)
+        theItem = rootItem;
+
+    if ([theItem isKindOfClass:[CPString class]])
+        return 0;
+
+    return [[theItem objectForKey:"Children"] count];
+}
+
+- (id)outlineView:(CPOutlineView)theOutlineView child:(int)theIndex ofItem:(id)theItem
+{
+    if (theItem == nil)
+        theItem = rootItem;
+
+    return [[theItem objectForKey:"Children"] objectAtIndex:theIndex];
+}
+
+- (BOOL)outlineView:(CPOutlineView)theOutlineView isItemExpandable:(id)theItem
+{
+    if (theItem == nil)
+        theItem = rootItem;
+
+    return ![theItem isKindOfClass:[CPString class]];
+}
+
+- (id)outlineView:(CPOutlineView)anOutlineView objectValueForTableColumn:(CPTableColumn)theColumn byItem:(id)theItem
+{
+    if ([theItem isKindOfClass:[CPString class]])
+        return theItem;
+
+    return [theItem objectForKey:"Name"];
+}
+
+- (BOOL)outlineView:(CPOutlineView)anOutlineView writeItems:(CPArray)theItems toPasteboard:(CPPasteBoard)thePasteBoard
+{
+    /*_draggedItems = theItems;
+    [thePasteBoard declareTypes:[CustomOutlineViewDragType] owner:self];
+    [thePasteBoard setData:[CPKeyedArchiver archivedDataWithRootObject:theItems] forType:CustomOutlineViewDragType];
+
+    return YES;*/
+}
+
+- (CPDragOperation)outlineView:(CPOutlineView)anOutlineView validateDrop:(id < CPDraggingInfo >)theInfo proposedItem:(id)theItem proposedChildIndex:(int)theIndex
+{
+    /*CPLog.debug(@"validate item: %@ at index: %i", theItem, theIndex);
+
+    if (theItem === nil)
+        [anOutlineView setDropItem:nil dropChildIndex:theIndex];
+
+    [anOutlineView setDropItem:theItem dropChildIndex:theIndex];
+
+    return CPDragOperationEvery;*/
+}
+
+- (BOOL)outlineView:(CPOutlineView)outlineView acceptDrop:(id < CPDraggingInfo >)theInfo item:(id)theItem childIndex:(int)theIndex
+{/*
+    if (theItem === nil)
+        theItem = [self menu];
+
+    // CPLog.debug(@"drop item: %@ at index: %i", theItem, theIndex);
+
+    var menuIndex = [_draggedItems count];
+
+    while (menuIndex--)
+    {
+        var menu = [_draggedItems objectAtIndex:menuIndex];
+
+        // CPLog.debug(@"move item: %@ to: %@ index: %@", menu, theItem, theIndex);
+
+        if (menu === theItem)
+            continue;
+
+        [menu removeFromMenu];
+        [theItem insertSubmenu:menu atIndex:theIndex];
+        theIndex += 1;
+    }
+
+    return YES;*/
+}
+@end
+
+
+/*!
+    OV Node
+*/
+@implementation SimpleNodeData : CPObject
+{
+    CPString       name @accessors(property=name);
+    CPImage       image @accessors(property=image);
+    BOOL      container @accessors(property=container);
+    BOOL     expandable @accessors(property=expandable);
+    BOOL     selectable @accessors(property=selectable);
+}
+
+- (id)init
+{
+    self = [super init];
+    name = @"Untitled";
+    expandable = YES;
+    selectable = YES;
+    container = YES;
+
+    return self;
+}
+
+- (id)initWithName:(CPString)aName
+{
+    self = [self init];
+    name = aName;
+
+    return self;
+}
+
++ (SimpleNodeData)nodeDataWithName:(CPString)aName
+{
+    return [[SimpleNodeData alloc] initWithName:aName];
+}
+
+- (CPComparisonResult)compare:(id)anOther
+{
+    // We want the data to be sorted by name, so we compare [self name] to [other name]
+    if ([anOther isKindOfClass:[SimpleNodeData class]])
+        return [name compare:[anOther name]];
+
+    return CPOrderedAscending;
+}
+
+- (CPString)description
+{
+    return [CPString stringWithFormat:@"%@ - '%@' expandable: %d, selectable: %d, container: %d", [super description], name, expandable, selectable, container];
+}
+
+@end
+
