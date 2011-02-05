@@ -71,6 +71,99 @@ var dataStructure = {name: "Root", sub: [
 */
 @implementation SampleControlTabs : CPObject
 
++ (CPView)generalHud
+{
+    var view = [[CPView alloc] initWithFrame:CGRectMake(0,0,390,285)];
+
+    var scroll = [[CPScrollView alloc] initWithFrame:CGRectMake(0,0,390,285)];
+    [scroll setDocumentView:view];
+    [[scroll verticalScroller] setTheme:[CPTheme themeNamed:"Aristo-HUD"]];
+    [[scroll horizontalScroller] setTheme:[CPTheme themeNamed:"Aristo-HUD"]];
+    [scroll setValue:[CPColor clearColor] forThemeAttribute:"bottom-corner-color"];
+    [scroll setAutoresizingMask:CPViewWidthSizable|CPViewHeightSizable];
+    [scroll setAutohidesScrollers:YES];
+    [[scroll bottomCornerView] setBackgroundColor:[CPColor clearColor]];
+
+    var label = [CPTextField labelWithTitle:"Buttons"];
+    [label setFrameOrigin:CGPointMake(55, 20)];
+    [label setTextColor:[CPColor whiteColor]];
+    [view addSubview:label]
+
+    var button = [[CPButton alloc] initWithFrame:CGRectMake(15, 40, 120, 24)];
+    [button setTitle:"Standard Button"];
+    [button setTheme:[CPTheme themeNamed:"Aristo-HUD"]];
+    [view addSubview:button];
+
+    var button = [[CPButton alloc] initWithFrame:CGRectMake(15, 75, 120, 24)];
+    [button setTitle:"Round Button"];
+    [button setTheme:[CPTheme themeNamed:"Aristo-HUD"]];
+    [button setThemeState:CPButtonStateBezelStyleRounded];
+    [view addSubview:button];
+
+    var button = [[CPButton alloc] initWithFrame:CGRectMake(15, 110, 120, 24)];
+    [button setTitle:"Default Button"];
+    [button setTheme:[CPTheme themeNamed:"Aristo-HUD"]];
+    [button setKeyEquivalent:CPCarriageReturnCharacter];
+    [view addSubview:button];
+
+    /*
+        Other
+    */
+    var label = [CPTextField labelWithTitle:"Other Controls"];
+    [label setFrameOrigin:CGPointMake(175, 20)];
+    [label setTextColor:[CPColor whiteColor]];
+    [view addSubview:label];
+
+    var control = [[CPSegmentedControl alloc] initWithFrame:CGRectMake(175, 40, 0, 24)];
+    [control setSegmentCount:3];
+    [control setWidth:50 forSegment:0];
+    [control setWidth:50 forSegment:1];
+    [control setWidth:50 forSegment:2];
+    [control setLabel:"Seg 1" forSegment:0];
+    [control setLabel:"Seg 2" forSegment:1];
+    [control setLabel:"Seg 3" forSegment:2];
+    [control setTheme:[CPTheme themeNamed:"Aristo-HUD"]];
+    [view addSubview:control];
+
+    var control = [[CPSegmentedControl alloc] initWithFrame:CGRectMake(175, 75, 0, 24)];
+    [control setSegmentCount:3];
+    [control setWidth:50 forSegment:0];
+    [control setWidth:50 forSegment:1];
+    [control setWidth:50 forSegment:2];
+    [control setLabel:"Seg 1" forSegment:0];
+    [control setLabel:"Seg 2" forSegment:1];
+    [control setLabel:"Seg 3" forSegment:2];
+    [control setTrackingMode:CPSegmentSwitchTrackingSelectAny];
+    [control setSelected:YES forSegment:0];
+    [control setSelected:YES forSegment:2];
+    [control setTheme:[CPTheme themeNamed:"Aristo-HUD"]];
+    [view addSubview:control];
+
+    var control1 = [[CPSlider alloc] initWithFrame:CGRectMake(175, 100, 150, 24)];
+    [control1 setTheme:[CPTheme themeNamed:"Aristo-HUD"]];
+    [control setFloatValue:25.0];
+    
+    [view addSubview:control1];
+
+    var control2 = [[CPSlider alloc] initWithFrame:CGRectMake(175, 135, 24, 120)];
+    [control2 setTheme:[CPTheme themeNamed:"Aristo-HUD"]];
+    [view addSubview:control2];
+
+    var control3 = [[CPSlider alloc] initWithFrame:CGRectMake(215, 150, 32,32)];
+    [control3 setTheme:[CPTheme themeNamed:"Aristo-HUD"]];
+    [control3 setSliderType:CPCircularSlider];
+    [view addSubview:control3];
+
+    // bind the two sliders
+    [control1 setTarget:control2];
+    [control1 setAction:@selector(takeFloatValueFrom:)];
+    [control2 setTarget:control1];
+    [control2 setAction:@selector(takeFloatValueFrom:)];
+
+
+    return scroll;
+}
+
 + (CPView)generalControls
 {
     var view = [[CPView alloc] initWithFrame:defaultViewRect];
@@ -494,6 +587,19 @@ var dataStructure = {name: "Root", sub: [
     [button setTarget:picker];
     [button setAction:@selector(orderFront:)];
 
+    
+    // HUD
+    var window = [[CPWindow alloc] initWithContentRect:CGRectMake(100, 100, 390, 285) styleMask:CPClosableWindowMask|CPResizableWindowMask|CPHUDBackgroundWindowMask];
+    [window setTitle:"HUD Window and Controls"];
+    [window setMinSize:CGSizeMake(200, 75)];
+    [[window contentView] addSubview:[self generalHud]];
+
+    var button = [[CPButton alloc] initWithFrame:CGRectMake(245, 59, 100, 24)];
+    [button setTitle:"HUD"];
+    [button setTarget:window];
+    [button setAction:@selector(orderFront:)];
+    [view addSubview:button];
+
     return view;
 
 }
@@ -835,5 +941,33 @@ var dataStructure = {name: "Root", sub: [
 - (void)didEndSheet:(CPWindow)aSheet returnCode:(int)returnCode contextInfo:(id)contextInfo
 {
    
+}
+@end
+
+@implementation CPView (menu)
++ (CPMenu)defaultMenu
+{
+    var menu = [[CPMenu alloc] init],
+        words = ["Views/Can have/Contextual menus/If you/Want" pathComponents];
+
+    for (var i = 0, c = [words count]; i < c; i++)
+    {
+        if (words[i] === "Contextual menus")
+        {
+            var item = [[CPMenuItem alloc] initWithTitle:words[i] action:nil keyEquivalent:nil],
+                sub = [[CPMenu alloc] init];
+
+            [sub addItemWithTitle:"And They" action:nil keyEquivalent:nil];
+            [sub addItemWithTitle:"Can Have" action:nil keyEquivalent:nil];
+            [sub addItemWithTitle:"Sub Menus" action:nil keyEquivalent:nil];
+
+            [item setSubmenu:sub]
+            [menu addItem:item];
+        }
+        else
+            [menu addItemWithTitle:words[i] action:nil keyEquivalent:nil];
+    }
+
+    return menu;
 }
 @end
