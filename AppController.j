@@ -455,6 +455,8 @@ var dataStructure = {name: "Root", sub: [
     [scroll setDocumentView:ov];
     [view addSubview:scroll];
 
+    [ov registerForDraggedTypes:["TestData"]];
+
     return view;
 
 }
@@ -828,49 +830,35 @@ var dataStructure = {name: "Root", sub: [
 
 - (BOOL)outlineView:(CPOutlineView)anOutlineView writeItems:(CPArray)theItems toPasteboard:(CPPasteBoard)thePasteBoard
 {
-    /*_draggedItems = theItems;
-    [thePasteBoard declareTypes:[CustomOutlineViewDragType] owner:self];
-    [thePasteBoard setData:[CPKeyedArchiver archivedDataWithRootObject:theItems] forType:CustomOutlineViewDragType];
+    [thePasteBoard declareTypes:["TestData"] owner:self];
+    [thePasteBoard setData:[CPKeyedArchiver archivedDataWithRootObject:theItems] forType:"testData"];
 
-    return YES;*/
+    return YES;
 }
 
 - (CPDragOperation)outlineView:(CPOutlineView)anOutlineView validateDrop:(id < CPDraggingInfo >)theInfo proposedItem:(id)theItem proposedChildIndex:(int)theIndex
 {
-    /*CPLog.debug(@"validate item: %@ at index: %i", theItem, theIndex);
-
     if (theItem === nil)
         [anOutlineView setDropItem:nil dropChildIndex:theIndex];
 
     [anOutlineView setDropItem:theItem dropChildIndex:theIndex];
 
-    return CPDragOperationEvery;*/
+    return CPDragOperationEvery;
 }
 
 - (BOOL)outlineView:(CPOutlineView)outlineView acceptDrop:(id < CPDraggingInfo >)theInfo item:(id)theItem childIndex:(int)theIndex
-{/*
-    if (theItem === nil)
-        theItem = [self menu];
+{
+    var alrt = [[CPAlert alloc] init];
 
-    // CPLog.debug(@"drop item: %@ at index: %i", theItem, theIndex);
+    [alrt setTitle:"Cool Features"];
+    [alrt setMessageText:"No reordering implemented"];
+    [alrt setInformativeText:"Since this is just a demo we haven't actually implement the drop behavior here."];
+    [alrt setAlertStyle:CPInformationalAlertStyle];
+    [alrt addButtonWithTitle:"Okay"];
 
-    var menuIndex = [_draggedItems count];
+    [alrt runModal];
 
-    while (menuIndex--)
-    {
-        var menu = [_draggedItems objectAtIndex:menuIndex];
-
-        // CPLog.debug(@"move item: %@ to: %@ index: %@", menu, theItem, theIndex);
-
-        if (menu === theItem)
-            continue;
-
-        [menu removeFromMenu];
-        [theItem insertSubmenu:menu atIndex:theIndex];
-        theIndex += 1;
-    }
-
-    return YES;*/
+    return NO;
 }
 @end
 
@@ -940,7 +928,7 @@ var dataStructure = {name: "Root", sub: [
 
 - (void)didEndSheet:(CPWindow)aSheet returnCode:(int)returnCode contextInfo:(id)contextInfo
 {
-   
+
 }
 @end
 
