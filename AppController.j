@@ -23,7 +23,6 @@ var dataStructure = {name: "Root", sub: [
                                          {name: "Applications", sub: ["XCode.app", "Atlas.app", "Kaleidoscope.app", "Issues.app"]},
                                        ]
                    };
-Object.prototype.isa = CPObject;
 
 @implementation AppController : CPObject
 {
@@ -344,12 +343,21 @@ Object.prototype.isa = CPObject;
     var scroll = [[CPScrollView alloc] initWithFrame:CGRectMake(15, 20, 600, 400)],
         ov = [[CPOutlineView alloc] initWithFrame:CGRectMakeZero()],
         col = [[CPTableColumn alloc] initWithIdentifier:"ovcol"];
+
     [[col headerView] setStringValue:"Outline Column"];
+
     var dataDelegate = [[OutlineViewDataSourceDelegate alloc] init];
     [dataDelegate setOv:ov];
     [ov setDataSource:dataDelegate];
     [ov setDelegate:dataDelegate];
+
+
+    [col setWidth:215];
     [ov addTableColumn:col];
+
+    var col2 = [[CPTableColumn alloc] initWithIdentifier:"Column 2"]
+    [[col2 headerView] setStringValue:"Column 2"];
+    [ov addTableColumn:col2];
 
     [scroll setDocumentView:ov];
     [view addSubview:scroll];
@@ -379,41 +387,112 @@ Object.prototype.isa = CPObject;
 {
     var view = [[CPView alloc] initWithFrame:defaultViewRect];
 
+    var window = [[CPWindow alloc] initWithContentRect:CGRectMake(100, 100, 400, 400) styleMask:CPClosableWindowMask|CPResizableWindowMask];
+    [window setTitle:"Sample Window"];
+    [window setMinSize:CGSizeMake(100,100)];
+
     var button = [[CPButton alloc] initWithFrame:CGRectMake(15, 20, 100, 24)];
     [button setTitle:"CPWindow"];
+    [button setTarget:window];
+    [button setAction:@selector(orderFront:)];
     [view addSubview:button];
+
+
+    // platofrm windows
+    var platformWindow = [[CPPlatformWindow alloc] initWithContentRect:CGRectMake(100,100,775,400)],
+        window = [[CPWindow alloc] initWithContentRect:CGRectMake(100, 100, 775, 400) styleMask:CPClosableWindowMask|CPResizableWindowMask];
+
+    [window setTitle:"Sample Window"];
+    [window setMinSize:CGSizeMake(100,100)];
+
+    [window setFullBridge:YES];
+    [window setPlatformWindow:platformWindow];
+
+    [window setContentView:[self generalControls]];
 
     var button = [[CPButton alloc] initWithFrame:CGRectMake(130, 20, 100, 24)];
     [button setTitle:"CPPlatformWindow"];
+    [button setTarget:window];
+    [button setAction:@selector(orderFront:)];
     [view addSubview:button];
+
+
+    // info alert
+    var alrt = [[CPAlert alloc] init];
+    [alrt setTitle:"Informational Alert"];
+    [alrt setMessageText:"Informational Alert"];
+    [alrt setInformativeText:"This CPAlert is used to display information modally. It can have a help button and an accessory view, and a supression button."];
+    [alrt setShowsHelp:YES];
+    [alrt setShowsSuppressionButton:YES];
+    [alrt setAlertStyle:CPInformationalAlertStyle];
+    [alrt addButtonWithTitle:"Okay"];
 
     var button = [[CPButton alloc] initWithFrame:CGRectMake(245, 20, 100, 24)];
     [button setTitle:"Info CPAlert"];
+    [button setTarget:alrt];
+    [button setAction:@selector(runModal)];
     [view addSubview:button];
+
+
+    // Warn alert
+    var alrt = [[CPAlert alloc] init];
+    [alrt setTitle:"Warning Alert"];
+    [alrt setMessageText:"Warning Alert"];
+    [alrt setInformativeText:"This CPAlert is used to display warnings modally. It can have a help button and an accessory view, and a supression button."];
+    [alrt setShowsHelp:YES];
+    [alrt setShowsSuppressionButton:YES];
+    [alrt setAlertStyle:CPWarningAlertStyle];
+    [alrt addButtonWithTitle:"Okay"];
 
     var button = [[CPButton alloc] initWithFrame:CGRectMake(370, 20, 100, 24)];
     [button setTitle:"Warn CPAlert"];
+    [button setTarget:alrt];
+    [button setAction:@selector(runModal)];
     [view addSubview:button];
+
+    // ERROR alert
+    var alrt = [[CPAlert alloc] init];
+    [alrt setTitle:"Error Alert"];
+    [alrt setMessageText:"Error Alert"];
+    [alrt setInformativeText:"This CPAlert is used to display errors modally. It can have a help button and an accessory view, and a supression button."];
+    [alrt setShowsHelp:YES];
+    [alrt setShowsSuppressionButton:YES];
+    [alrt setAlertStyle:CPCriticalAlertStyle];
+    [alrt addButtonWithTitle:"Okay"];
 
     var button = [[CPButton alloc] initWithFrame:CGRectMake(495, 20, 100, 24)];
     [button setTitle:"Error CPAlert"];
+    [button setTarget:alrt];
+    [button setAction:@selector(runModal)];
     [view addSubview:button];
+
+
+    // SHEETS
+    var alrt = [[CPAlert alloc] init];
+    [alrt setTitle:"Informational Alert"];
+    [alrt setMessageText:"Informational Alert"];
+    [alrt setInformativeText:"CPAlerts can also be used as sheets! With the same options as before."];
+    [alrt setShowsHelp:YES];
+    [alrt setShowsSuppressionButton:YES];
+    [alrt setAlertStyle:CPInformationalAlertStyle];
+    [alrt addButtonWithTitle:"Okay"];
+
+    var controller = [[SheetController alloc] init];
+    [controller setSheet:alrt];
 
     var button = [[CPButton alloc] initWithFrame:CGRectMake(15, 59, 100, 24)];
     [button setTitle:"Attached Sheet"];
+    [button setTarget:controller];
+    [button setAction:@selector(beginSheet:)];
     [view addSubview:button];
 
+    // color panel
     var button = [[CPButton alloc] initWithFrame:CGRectMake(130, 59, 100, 24)];
     [button setTitle:"Color Panel"];
     [view addSubview:button];
-
     var picker = [CPColorPanel sharedColorPanel];
     [button setTarget:picker];
     [button setAction:@selector(orderFront:)];
-
-    var button = [[CPButton alloc] initWithFrame:CGRectMake(245, 59, 100, 24)];
-    [button setTitle:"Window & Toolbar"];
-    [view addSubview:button];
 
     return view;
 
@@ -742,3 +821,19 @@ Object.prototype.isa = CPObject;
 
 @end
 
+@implementation SheetController : CPObject
+{
+    CPAlert sheet @accessors;
+}
+
+- (void)beginSheet:(id)sender
+{
+    [sheet beginSheetModalForWindow:[CPApp mainWindow]];
+    //[CPApp beginSheet:sheet modalForWindow:[CPApp mainWindow] modalDelegate:self didEndSelector:@selector(didEndSheet:returnCode:contextInfo:) contextInfo:nil];
+}
+
+- (void)didEndSheet:(CPWindow)aSheet returnCode:(int)returnCode contextInfo:(id)contextInfo
+{
+   
+}
+@end
