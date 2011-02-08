@@ -44,11 +44,23 @@ var dataStructure = {name: "Root", sub: [
 
     for (var i = 0, c = [items count]; i < c; i++)
     {
-        var view = objj_msgSend(SampleControlTabs, items[i], nil);//[SampleControlTabs performSelector:items[i]];
-
         var tab = [[CPTabViewItem alloc] initWithIdentifier:items[i]];
         [tab setLabel:items[i]];
-        [tab setView:view];
+
+        if(i === 0)
+        {
+            var view = objj_msgSend(SampleControlTabs, items[i], nil);
+            [tab setView:view];
+        }
+        else
+        {
+            // makes startup time seem a little faster...
+            var selector = items[i];
+            window.setTimeout(function(){
+                var view = objj_msgSend(SampleControlTabs, selector, nil);
+                [tab setView:view];
+            },0);
+        }
 
         [tabview addTabViewItem:tab];
     }
@@ -63,6 +75,7 @@ var dataStructure = {name: "Root", sub: [
 }
 
 @end
+
 
 
 /*!
@@ -203,6 +216,11 @@ var dataStructure = {name: "Root", sub: [
     [button addItemsWithTitles:["Pulldown Button", "Item 2", "Item 3"]];
     [view addSubview:button];
 
+    var control = [[CPButton alloc] initWithFrame:CGRectMake(15, 280, 120, 24)];
+    [control setTitle:"Disable All"];
+    [control setTarget:view];
+    [control setAction:@selector(toggleEnabledSubviews:)];
+    [view addSubview:control];
 
     /*
         Text
@@ -932,7 +950,7 @@ var dataStructure = {name: "Root", sub: [
 }
 @end
 
-@implementation CPView (menu)
+@implementation CPView (DemoExtras)
 + (CPMenu)defaultMenu
 {
     var menu = [[CPMenu alloc] init],
@@ -957,5 +975,25 @@ var dataStructure = {name: "Root", sub: [
     }
 
     return menu;
+}
+
+- (void)toggleEnabledSubviews:(id)sender
+{
+    var subviews = [self subviews],
+        c = [subviews count];
+
+    while (c--)
+    {
+        var view = subviews[c];
+
+        if (view === sender)
+        {
+            [view setTitle:[view title] === "Disable All" ? "Enable All" : "Disable All"];
+            continue;
+        }
+
+        if ([view respondsToSelector:@selector(setEnabled:)])
+           [view setEnabled:![view isEnabled]];
+    }
 }
 @end
