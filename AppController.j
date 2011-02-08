@@ -46,21 +46,8 @@ var dataStructure = {name: "Root", sub: [
     {
         var tab = [[CPTabViewItem alloc] initWithIdentifier:items[i]];
         [tab setLabel:items[i]];
+        [tab setView:objj_msgSend(SampleControlTabs, items[i], nil)];
 
-        if(i === 0)
-        {
-            var view = objj_msgSend(SampleControlTabs, items[i], nil);
-            [tab setView:view];
-        }
-        else
-        {
-            // makes startup time seem a little faster...
-            var selector = items[i];
-            window.setTimeout(function(){
-                var view = objj_msgSend(SampleControlTabs, selector, nil);
-                [tab setView:view];
-            },0);
-        }
 
         [tabview addTabViewItem:tab];
     }
@@ -794,8 +781,6 @@ var dataStructure = {name: "Root", sub: [
         request   = [CPURLRequest requestWithURL:path],
         connection = [CPURLConnection connectionWithRequest:request delegate:self];
 
-    rootItem = nil;
-
     return self;
 }
 
@@ -805,8 +790,9 @@ var dataStructure = {name: "Root", sub: [
     if (!dataString)
         return;
 
-    var data = [[CPData alloc] initWithRawString:dataString],
-        rootItem = [CPPropertyListSerialization propertyListFromData:data format:CPPropertyListXMLFormat_v1_0];
+    var data = [[CPData alloc] initWithRawString:dataString];
+
+    rootItem = [CPPropertyListSerialization propertyListFromData:data format:CPPropertyListXMLFormat_v1_0];
 
     [ov reloadData];
 }
